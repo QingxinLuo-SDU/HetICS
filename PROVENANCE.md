@@ -27,6 +27,10 @@ Unit records carry the implementation that produced them.
 * The binary formal runner has an explicit `--stage r1/r2` option (default r2); round 1 uses its own design table, structure names and seeds.
 * Machine-specific paths and server identities are removed from defaults, examples, metadata and the source identifiers of the frozen labels.
 
+## Installable package
+
+`src/hetics/` holds the method for use on other data. `_seam.py`, `_chow.py`, `_reml.py` and `_aipw.py` are copies of `continuous/seam_clustering.py`, `continuous/chow_test.py`, `continuous/random_effects_gls.py` and `binary/src/aipw_sandwich.py` with changed import lines; the label code is `binary/vendor/bniseam_test/`, installed as `hetics._labels`. `tests/test_package.py` checks the copies against the branch code and compares the results of `fit_ra` and `fit_aipw` with the branch code on the same data. For this, `b2_multiview_design.json` moved next to `design.py` (`binary/vendor/patches/design.py.diff`).
+
 ## Frozen simulation labels
 
 `binary/config/labels/labels_r1.csv.gz` and `labels_r2.csv.gz` originate from the formal units of rounds 1 and 2 and hold replication identities, parameter and data seeds, learned center assignments, availability status and check values. The ablation and pooled runners reuse these assignments instead of rerunning the grouping stage. `tools/extract_frozen_labels.py` reads the unit records from result archives, which are not included. The tables are not clinical data or Monte Carlo summaries.

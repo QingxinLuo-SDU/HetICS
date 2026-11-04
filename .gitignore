@@ -35,3 +35,6 @@ figures/**/input/
 figures/*/figures/
 figures/continuous/u_sensitivity/
 figures/**/sessionInfo.txt
+build/
+dist/
+*.egg-info/

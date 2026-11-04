@@ -6,9 +6,34 @@ Simulation code for **Heterogeneity-Guided Cross-Center Invariant Covariate Sele
 
 HetICS groups centers into clusters, selects covariates within each cluster by fixed-X knockoff screening on the exposure and the outcome followed by a partial Chow test of cross-center invariance, and estimates the treatment effect with the selected adjustment sets. The primary estimators are **HetICS-RA** for continuous outcomes and **HetICS-AIPW** for binary outcomes. The supplementary estimators are Robinson's estimator and generalized propensity score weighting (with and without truncation) for continuous outcomes, and regression standardization and propensity score matching for binary outcomes.
 
+## Installation and use
+
+```sh
+pip install git+https://github.com/QingxinLuo-SDU/HetICS
+```
+
+or `pip install .` from a checkout. The package needs Python 3.10 or later and installs NumPy, SciPy, scikit-learn and statsmodels.
+
+```python
+import hetics
+
+# continuous exposure and outcome: HetICS-RA
+result = hetics.fit_ra(F, X, Y, centers, K=3)
+result["clusters"][0]["selected"], result["clusters"][0]["theta"], result["overall"]["mu"]
+
+# binary exposure and outcome: HetICS-AIPW, on the risk-difference scale
+result = hetics.fit_aipw(F, X, Y, centers, K=3, analysis_id="my-study")
+result["estimate"], result["se"], result["ci95"], result["clusters"][0]["selected"]
+```
+
+`F` is the array of baseline covariates (rows are individuals; no intercept or center dummies), `X`, `Y` and `centers` are vectors, and `K` is the prespecified number of center clusters. Selected covariates are column indices of `F`; pass `feature_names` to get names as well. Both functions check their inputs and raise an error when a cluster is too small for fixed-X knockoffs (more than 2p + 1 observations are needed); `fit_aipw` also raises one when the label algorithm abstains. Limit numerical libraries to one thread when running many analyses in parallel. See the docstrings for all options.
+
+To reproduce the paper's simulations, use the branch code and pinned environments below; the package is for applying the method and does not pin the package versions of the reported runs.
+
 ## Layout
 
 ```text
+src/hetics/          installable package for applying HetICS to other data
 continuous/          continuous DGP, clustering, screening, estimators, runners and tests
 binary/
   src/               binary runners, estimators and summaries
@@ -21,7 +46,7 @@ formal/              Lean 4 formalization of the core proof steps
 .agents/skills/      agent skill for applying HetICS to user data
 ```
 
-No patient data, application files, simulation results or per-replication output are included. The two frozen-label files under `binary/config/labels/` are simulation-derived inputs of the binary ablation and pooled-comparator runs.
+No patient data, application files, simulation results, per-replication output or figure scripts are included. The two frozen-label files under `binary/config/labels/` are simulation-derived inputs of the binary ablation and pooled-comparator runs.
 
 ## Environments
 
@@ -104,13 +129,14 @@ See [binary/README.md](binary/README.md).
 ```sh
 cd continuous && SCENA_BETA_ANCHOR=1.0,1.25 SCENA_EXPERIMENT=grid python -m pytest tests -q
 cd binary && python -m pytest tests -q
+pip install ".[test]" && python -m pytest tests -q   # package, from the repository root
 ```
 
 Some continuous tests require `SCENA_BETA_ANCHOR=2.0,3.0` and are skipped otherwise. See [VALIDATION.md](VALIDATION.md).
 
-## Applying HetICS to other data
+## Agent skill
 
-[.agents/skills/hetics/SKILL.md](.agents/skills/hetics/SKILL.md) describes how to call HetICS-RA and HetICS-AIPW on a user's own multi-center data with the code of this repository.
+[.agents/skills/hetics/SKILL.md](.agents/skills/hetics/SKILL.md) tells a coding agent how to apply HetICS-RA and HetICS-AIPW to a user's own multi-center data, including the checks to make before and after fitting.
 
 ## Formal proofs
 

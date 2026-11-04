@@ -31,6 +31,10 @@ Both recipes use fixed-X knockoffs: each learned group needs more than `2 * p + 
 
 In the snippets below, `repo_root` is a `pathlib.Path` to the checkout, and the arrays and analysis parameters have already been validated. For binary data, also set `analysis_id` to a stable run name such as `"CUSTOM_DATA"`. Set numerical-library thread limits before importing NumPy. Follow the relevant recipe only.
 
+## Installed package
+
+`pip install` of this repository provides `hetics.fit_ra(F, X, Y, centers, K=...)` and `hetics.fit_aipw(F, X, Y, centers, K=...)`, which run the two recipes below, accept arbitrary center labels and check their inputs. Prefer them when the analysis needs nothing beyond the recipe; the choices and reporting rules of this skill apply to them as well. `tests/test_package.py` checks that both give the same results as the recipes.
+
 ## Continuous data: HetICS-RA
 
 Read `continuous/seam_clustering.py`, `step6x_methods.py`, `seam_support_methods.py`, `ra_core.py`, and `random_effects_gls.py` when preparing the analysis script. `fit_once()` generates simulations; `fit_existing_selection_pipeline()` requires simulation truth. Neither is a user-data entry point.

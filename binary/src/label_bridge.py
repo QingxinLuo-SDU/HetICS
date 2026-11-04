@@ -24,7 +24,7 @@ _PKG_ROOT = os.path.dirname(_HERE)
 VENDOR_DIR = os.path.join(_PKG_ROOT, "vendor")
 STEP6_DIR = os.path.join(VENDOR_DIR, "step6_pkg")
 
-# Configuration: partition, combinations and seeds from config/b2_multiview_design.json; solver, sample size,
+# Configuration: partition, combinations and seeds from vendor/bniseam_test/b2_multiview_design.json; solver, sample size,
 # guard threshold (GUARD_STABILITY_THRESHOLD) and epsilon_prob (EPSILON_PROB) as registered for the label
 # package.
 REGISTERED_UNIT: dict[str, Any] = {
@@ -32,7 +32,7 @@ REGISTERED_UNIT: dict[str, Any] = {
     "param_rep": 1,
     "data_rep": 1,
     "override_n_per_center": 8000,
-    "design_config": "config/b2_multiview_design.json",
+    "design_config": "vendor/bniseam_test/b2_multiview_design.json",
     "solver_config": "configs/b2_v3_r_nper8000_diagnostic.yaml",
     "solver": {
         "support_size": 25,

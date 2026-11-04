@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hetics"
+dynamic = ["version"]
+description = "Heterogeneity-guided cross-center invariant covariate selection for causal effect estimation in multi-center studies"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Qingxin Luo" }]
+keywords = ["causal inference", "multicenter studies", "variable selection", "heterogeneity"]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "scikit-learn>=1.3",
+    "statsmodels>=0.14",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.urls]
+Repository = "https://github.com/QingxinLuo-SDU/HetICS"
+
+[tool.setuptools]
+packages = ["hetics", "hetics._labels"]
+
+[tool.setuptools.package-dir]
+"hetics" = "src/hetics"
+"hetics._labels" = "binary/vendor/bniseam_test"
+
+[tool.setuptools.package-data]
+"hetics._labels" = ["b2_multiview_design.json"]
+
+[tool.setuptools.dynamic]
+version = { attr = "hetics.__version__" }

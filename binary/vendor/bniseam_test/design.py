@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 
-_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "b2_multiview_design.json"
+_CONFIG_PATH = Path(__file__).resolve().with_name("b2_multiview_design.json")
 SEED_DERIVATION_VERSION = "b2-multiview-seeds-v1"
 _UINT32_MODULUS = 2**32 - 1
 
