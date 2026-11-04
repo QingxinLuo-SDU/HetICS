@@ -13,7 +13,7 @@ Date: **2026-11-04**. Local environment: Windows, Python 3.13.9, NumPy 2.3.4, Sc
 
 Continuous tests that depend on the coefficient band or seed namespace are skipped under the other setting.
 
-The package tests (`tests/test_package.py`, 7 passed) ran after a clean `pip install` under Python 3.13.9, NumPy 2.5.4, SciPy 1.18.1, scikit-learn 1.9.1 and statsmodels 0.15.0. They check the copied modules against the branch code and compare `fit_ra` and `fit_aipw` with the branch code on the same synthetic data; selections, estimates and standard errors are identical. The package has not been run under Python 3.10 to 3.12.
+The package tests (`tests/test_package.py`, 8 passed) ran after a clean `pip install` under Python 3.13.9, NumPy 2.5.4, SciPy 1.18.1, scikit-learn 1.9.1 and statsmodels 0.15.0. They check the copied modules against the branch code and compare `fit_ra` and `fit_aipw` with the branch code on the same synthetic data; selections, estimates and standard errors are identical. The package has not been run under Python 3.10 to 3.12.
 
 ## Comparison with the code of the reported runs
 

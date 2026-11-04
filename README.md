@@ -26,7 +26,7 @@ result = hetics.fit_aipw(F, X, Y, centers, K=3, analysis_id="my-study")
 result["estimate"], result["se"], result["ci95"], result["clusters"][0]["selected"]
 ```
 
-`F` is the array of baseline covariates (rows are individuals; no intercept or center dummies), `X`, `Y` and `centers` are vectors, and `K` is the prespecified number of center clusters. Selected covariates are column indices of `F`; pass `feature_names` to get names as well. Both functions check their inputs and raise an error when a cluster is too small for fixed-X knockoffs (more than 2p + 1 observations are needed); `fit_aipw` also raises one when the label algorithm abstains. Limit numerical libraries to one thread when running many analyses in parallel. See the docstrings for all options.
+`F` is the array of baseline covariates (rows are individuals; no intercept or center dummies), `X`, `Y` and `centers` are vectors, and `K` is the prespecified number of center clusters. Selected covariates are column indices of `F`; pass `feature_names` to get names as well. Both functions check their inputs and raise an error when a cluster is too small for fixed-X knockoffs (more than 2p + 1 observations are needed); `fit_aipw` also raises one when the label algorithm abstains. Knockoff+ at the default `q=0.10` selects no covariate or at least 10, so a study with few covariates or weak signals can end with an empty adjustment set; the functions warn when this happens. Limit numerical libraries to one thread when running many analyses in parallel. See the docstrings for all options.
 
 To reproduce the paper's simulations, use the branch code and pinned environments below; the package is for applying the method and does not pin the package versions of the reported runs.
 

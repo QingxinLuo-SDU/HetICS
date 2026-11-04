@@ -1,4 +1,7 @@
 """_screening.py — input checks, fixed-X knockoff candidates and the partial Chow invariance selection."""
+import math
+import warnings
+
 import numpy as np
 from sklearn.linear_model import LassoLarsIC
 
@@ -101,7 +104,12 @@ def knockoff_candidates(F_k, Y_k, X_k, env_k, q):
     Fp, Yp = prep(F_k, Y_k, env_k)
     _, Xp = prep(F_k, X_k, env_k)
     Ft = fixed_x_knockoff(Fp)
-    return lcd_select(Fp, Ft, Xp, q), lcd_select(Fp, Ft, Yp, q)
+    S_x, S_y = lcd_select(Fp, Ft, Xp, q), lcd_select(Fp, Ft, Yp, q)
+    if not S_x | S_y:
+        warnings.warn(f"knockoff+ selected no candidate in a cluster: at q={q} it selects none or at least "
+                      f"{math.ceil(1 / q)} covariates, so the adjustment set of that cluster is empty and its effect "
+                      "estimate is unadjusted for covariates", stacklevel=3)
+    return S_x, S_y
 
 
 def icp_select(F_k, Y_k, env_k, candidates, n_centers_k, alpha, *, fallback):

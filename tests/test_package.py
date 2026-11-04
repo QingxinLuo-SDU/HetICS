@@ -146,3 +146,14 @@ def test_inputs_are_checked():
         hetics.fit_ra(np.column_stack([F, F[:, 0]]), X, Y, env, K=2)
     with pytest.raises(ValueError, match="2 K centers"):
         hetics.fit_ra(F, X, Y, env, K=5)
+
+
+def test_empty_candidate_sets_raise_a_warning():
+    rng = np.random.default_rng(3)
+    env = np.repeat(np.arange(8), 200)
+    F = rng.normal(size=(1600, 10))
+    X = F[:, 0] + rng.normal(size=1600)
+    Y = X + F[:, 0] + rng.normal(size=1600)
+    with pytest.warns(UserWarning, match="selected no candidate"):
+        result = hetics.fit_ra(F, X, Y, env, K=2, sparsity=4)
+    assert all(c["selected"] == [] for c in result["clusters"])
