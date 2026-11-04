@@ -1,0 +1,16 @@
+# Python 3.11; versions of the original formal-run environment.
+numpy==1.26.4
+scipy==1.17.1
+pandas==3.0.2
+scikit-learn==1.8.0
+pytest==8.3.5
+joblib==1.6.0
+threadpoolctl==3.7.0
+colorama==0.4.6
+iniconfig==2.3.0
+packaging==26.3
+pluggy==1.6.0
+python-dateutil==2.9.0.post0
+pytz==2026.3.post1
+six==1.17.0
+tzdata==2026.4

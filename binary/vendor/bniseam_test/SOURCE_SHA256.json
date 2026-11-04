@@ -1,0 +1,53 @@
+{
+  "source_dir": "internal/bniseam_test",
+  "files": {
+    "__init__.py": {
+      "source_sha256": "70c0f3e8e04903ae2cb11fe0f4af74e171680a790c419558f97a2c165ef1a5da"
+    },
+    "cem_assignment.py": {
+      "source_sha256": "71bf3d1ff9710de94e181d0c9ca03f55cf661883b28a38478369a1085d24006e"
+    },
+    "cem_objectives.py": {
+      "source_sha256": "c75610e5fada50866b074903de88700063e48a2e96f38578df1bb8264becbcd6"
+    },
+    "cem_optimizer.py": {
+      "source_sha256": "cc78ab824387afab8f39eee6a4d687b97e3e9599c3e49d124575d564f050ca6d"
+    },
+    "cem_types.py": {
+      "source_sha256": "bbd1ebb0eddcdd321046226bf9f084e328b7dfe2c55f8e958ae273ed44c72eaf"
+    },
+    "design.py": {
+      "source_sha256": "291439ef5b515d37fa4f550501290cfefb88ae9e6ec775230d04404637b24422"
+    },
+    "feature_transform.py": {
+      "source_sha256": "f98dfac117083b325f7e709ac827621f227efe6950582c7bd3afc9f6e88f8ef7"
+    },
+    "model.py": {
+      "source_sha256": "3c4dd13f143095bfd62f1945f8eafcb013c92b2c496419696de6228ca110258f"
+    },
+    "multiview_a2.py": {
+      "source_sha256": "50ff1accfde2740742a4841fe07ff57e11fb3d4ba40263730c4e42dcf55717a7"
+    },
+    "multiview_candidates.py": {
+      "source_sha256": "451886b87f5d7d8d2f0eb36af4a6c02bb3d80746294b4b17f975f7e9b0f509ca"
+    },
+    "multiview_pipeline.py": {
+      "source_sha256": "c450862b3b93d84d2f585631f8b9c50eca9a1fe7580ccdf82ece450fae213a54"
+    },
+    "multiview_scoring.py": {
+      "source_sha256": "ac4d2a8b3499c72b6d050e3fa96f165fbd1ecc8fb6622e2da389e992d727a3cb"
+    },
+    "multiview_split.py": {
+      "source_sha256": "a0517c5593907e1087d7d183f5ee5d8da6af5bb680da88a76b900e17ed6c59a7"
+    },
+    "multiview_types.py": {
+      "source_sha256": "038f9c94b88b0f5ec176366d0bf38b260d31ffd01afe66c8ab590d9eb14e5bc6"
+    },
+    "multiview_validation.py": {
+      "source_sha256": "6807a2f9a3305502c7048c3ac4511477b7646cb779801d48435b537b39fadc18"
+    },
+    "multiview_views.py": {
+      "source_sha256": "585c70b73f26244145b1c9d1a5dff2cc30ca7fe275e7c84e303e3808872c6fd3"
+    }
+  }
+}

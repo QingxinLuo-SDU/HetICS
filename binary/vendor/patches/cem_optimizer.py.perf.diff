@@ -1,0 +1,83 @@
+--- binary_formal_v4_20260919/vendor/bniseam_test/cem_optimizer.py	2026-09-19 00:20:30.373523400 +0800
++++ binary_formal_v4_perf_20260919/vendor/bniseam_test/cem_optimizer.py	2026-09-19 18:52:24.369659100 +0800
+@@ -9,6 +9,7 @@
+ 
+ from .cem_assignment import solve_constrained_assignment
+ from .cem_objectives import (
++    _classification_objective_from_loglik,
+     classification_objective,
+     dense_center_codes,
+     hard_score_matrix,
+@@ -25,6 +26,7 @@
+     FitError,
+     Parameters,
+     StepInfo,
++    _hard_label_m_step_with_loglik,
+     hard_label_m_step,
+     parameter_change,
+ )
+@@ -605,9 +607,16 @@
+ 
+     trace.append(_initial_trace_row(objective, fixed_labels, current.k_components))
+ 
++    # E2 (perf): labels, data and the one-hot responsibilities are fixed for the whole
++    # refit, and ``regression_q`` never reads ``pi`` -- so the accepted ``q_reg_new`` of
++    # the previous step *is* this step's ``q_reg_old``.  Advanced only once ``proposed``
++    # has passed every original check and actually become ``current`` (see below), so a
++    # rejected candidate's value can never leak into the next step.
++    cached_q_reg_old: float | None = None
++
+     for iteration in range(1, config.max_iter + 1):
+         try:
+-            proposed, info = hard_label_m_step(
++            proposed, info, accepted_loglik = _hard_label_m_step_with_loglik(
+                 current,
+                 fixed_labels,
+                 observed.treatment,
+@@ -615,6 +624,7 @@
+                 observed.outcome,
+                 center_codes,
+                 config,
++                q_reg_old=cached_q_reg_old,
+             )
+         except FitError as error:
+             return fail("m_step_backtracking_failed", str(error))
+@@ -630,11 +640,25 @@
+             return fail(status, reason)
+ 
+         try:
+-            proposed_objective = classification_objective(
+-                observed,
+-                proposed,
+-                fixed_labels,
+-            )
++            # E3: `proposed` differs from the accepted candidate only in `pi`, which
++            # neither the predictor nor the per-row log-likelihood reads -- so the array
++            # the M-step just produced is exactly what `classification_objective` would
++            # recompute here.  `None` (no candidate accepted) falls back to the original
++            # call, which is also what the very first objective above uses.
++            if accepted_loglik is None:
++                proposed_objective = classification_objective(
++                    observed,
++                    proposed,
++                    fixed_labels,
++                )
++            else:
++                proposed_objective = _classification_objective_from_loglik(
++                    observed,
++                    proposed,
++                    fixed_labels,
++                    accepted_loglik,
++                    center_codes,
++                )
+             change = parameter_change(current, proposed)
+             with np.errstate(over="ignore", invalid="ignore"):
+                 relative_objective_change = float(
+@@ -673,6 +697,7 @@
+         )
+         current = proposed
+         objective = proposed_objective
++        cached_q_reg_old = info.q_reg_new          # E2: only now, after every check
+         if (
+             0.0
+             <= relative_objective_change

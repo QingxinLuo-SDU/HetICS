@@ -1,0 +1,213 @@
+--- binary_formal_v4_20260919/vendor/bniseam_test/model.py	2026-09-19 00:20:30.375524900 +0800
++++ binary_formal_v4_perf_20260919/vendor/bniseam_test/model.py	2026-09-19 18:51:52.208101600 +0800
+@@ -166,18 +166,41 @@
+     return float(np.sum(terms) / responsibilities.shape[0])
+ 
+ 
+-def regression_q(
++def _regression_q_parts(
+     parameters: Parameters,
+     responsibilities: np.ndarray,
+     treatment: np.ndarray,
+     features: np.ndarray,
+     outcome: np.ndarray,
+     center_codes: np.ndarray,
+-) -> float:
++) -> tuple[float, np.ndarray]:
++    """E3 (perf): the original body, additionally handing back ``sample_loglik``.
++
++    ``component_loglik_matrix`` recomputes exactly this array from exactly these
++    parameters one call later (``pi`` is the only difference between them, and neither
++    the predictor nor the per-row log-likelihood reads it).  Returning it lets the
++    fixed-label refit aggregate the same numbers a second way instead of recomputing
++    them.  The reduction below is untouched, so ``regression_q`` stays bit-for-bit
++    what it was.
++    """
++
+     eta = linear_predictor(parameters, treatment, features)
+     sample_loglik = outcome[:, None] * eta - np.logaddexp(0.0, eta)
+     weights = responsibilities[center_codes]
+-    return float(np.sum(weights * sample_loglik) / outcome.size)
++    return float(np.sum(weights * sample_loglik) / outcome.size), sample_loglik
++
++
++def regression_q(
++    parameters: Parameters,
++    responsibilities: np.ndarray,
++    treatment: np.ndarray,
++    features: np.ndarray,
++    outcome: np.ndarray,
++    center_codes: np.ndarray,
++) -> float:
++    return _regression_q_parts(
++        parameters, responsibilities, treatment, features, outcome, center_codes
++    )[0]
+ 
+ 
+ def regression_gradient(
+@@ -269,8 +292,47 @@
+     outcome: np.ndarray,
+     center_codes: np.ndarray,
+     config: FitConfig,
++    *,
++    q_reg_old: float | None = None,
+ ) -> tuple[Parameters, StepInfo]:
+-    """Exact pi update plus one accepted preconditioned IHT regression step."""
++    """Public M-step: unchanged signature and unchanged ``(Parameters, StepInfo)``.
++
++    The n x K array E3 reuses stays out of ``StepInfo`` on purpose -- that object is
++    kept in every trajectory row and serialized into diagnostics.  Callers that want it
++    use the private ``_generalized_m_step_with_loglik`` instead.
++    """
++
++    parameters, info, _loglik = _generalized_m_step_with_loglik(
++        parameters, responsibilities, treatment, features, outcome, center_codes,
++        config, q_reg_old=q_reg_old,
++    )
++    return parameters, info
++
++
++def _generalized_m_step_with_loglik(
++    parameters: Parameters,
++    responsibilities: np.ndarray,
++    treatment: np.ndarray,
++    features: np.ndarray,
++    outcome: np.ndarray,
++    center_codes: np.ndarray,
++    config: FitConfig,
++    *,
++    q_reg_old: float | None = None,
++) -> tuple[Parameters, StepInfo, np.ndarray | None]:
++    """Exact pi update plus one accepted preconditioned IHT regression step.
++
++    Third element is the accepted candidate's per-row log-likelihood (E3), or ``None``
++    when backtracking failed and no candidate was accepted.
++
++    E2 (perf): ``q_reg_old`` may be supplied by a caller that already holds the value
++    for *these* parameters and responsibilities -- in a fixed-label refit the accepted
++    ``q_reg_new`` of step t is, by construction, the ``q_reg_old`` of step t+1
++    (``regression_q`` never reads ``pi``, and the accepted candidate becomes ``current``).
++    Default ``None`` keeps the original behaviour, and callers whose responsibilities or
++    parameters can change between steps -- the CEM outer loop, warmup, the full EM --
++    must not pass it.
++    """
+ 
+     q_pi_old = q_pi(parameters, responsibilities)
+     new_pi = responsibilities.mean(axis=0)
+@@ -280,17 +342,21 @@
+     if q_pi_new + config.q_tolerance < q_pi_old:
+         raise FitError("Ordinary pi update lowered Q_pi")
+ 
+-    q_reg_old = regression_q(
+-        parameters,
+-        responsibilities,
+-        treatment,
+-        features,
+-        outcome,
+-        center_codes,
+-    )
++    if q_reg_old is None:
++        q_reg_old = regression_q(
++            parameters,
++            responsibilities,
++            treatment,
++            features,
++            outcome,
++            center_codes,
++        )
++    else:
++        q_reg_old = float(q_reg_old)
+     accepted: Parameters | None = None
+     accepted_q = q_reg_old
+     accepted_step = 0.0
++    accepted_loglik: np.ndarray | None = None
+     attempt = 0
+     for attempt in range(config.max_backtracking + 1):
+         candidate_step = config.step_size * config.backtracking_factor**attempt
+@@ -304,7 +370,7 @@
+             config,
+             candidate_step,
+         )
+-        candidate_q = regression_q(
++        candidate_q, candidate_loglik = _regression_q_parts(
+             candidate,
+             responsibilities,
+             treatment,
+@@ -316,11 +382,15 @@
+             accepted = candidate
+             accepted_q = candidate_q
+             accepted_step = candidate_step
++            # E3: keep only the *accepted* candidate's array; a rejected attempt's
++            # numbers must never be reused.
++            accepted_loglik = candidate_loglik
+             break
+ 
+     failed = accepted is None
+     if accepted is None:
+         accepted = parameters.clone()
++        accepted_loglik = None
+     accepted.pi = new_pi
+     accepted.validate()
+     return accepted, StepInfo(
+@@ -331,7 +401,7 @@
+         backtracking_count=attempt if not failed else config.max_backtracking + 1,
+         accepted_step_size=accepted_step,
+         backtracking_failed=failed,
+-    )
++    ), accepted_loglik
+ 
+ 
+ def hard_label_m_step(
+@@ -342,11 +412,37 @@
+     outcome: np.ndarray,
+     center_codes: np.ndarray,
+     config: FitConfig,
++    *,
++    q_reg_old: float | None = None,
+ ) -> tuple[Parameters, StepInfo]:
+-    """Run one fixed-label M-step and reject failed backtracking loudly."""
++    """Run one fixed-label M-step and reject failed backtracking loudly.
++
++    ``q_reg_old`` is the E2 pass-through; see ``generalized_m_step``.  Only a caller
++    that holds the labels fixed across steps may supply it.
++    """
++
++    updated, info, _loglik = _hard_label_m_step_with_loglik(
++        parameters, labels, treatment, features, outcome, center_codes, config,
++        q_reg_old=q_reg_old,
++    )
++    return updated, info
++
++
++def _hard_label_m_step_with_loglik(
++    parameters: Parameters,
++    labels: np.ndarray,
++    treatment: np.ndarray,
++    features: np.ndarray,
++    outcome: np.ndarray,
++    center_codes: np.ndarray,
++    config: FitConfig,
++    *,
++    q_reg_old: float | None = None,
++) -> tuple[Parameters, StepInfo, np.ndarray | None]:
++    """``hard_label_m_step`` plus the accepted candidate's per-row log-likelihood (E3)."""
+ 
+     responsibilities = np.eye(parameters.k_components, dtype=float)[labels]
+-    updated, info = generalized_m_step(
++    updated, info, loglik = _generalized_m_step_with_loglik(
+         parameters,
+         responsibilities,
+         treatment,
+@@ -354,10 +450,11 @@
+         outcome,
+         center_codes,
+         config,
++        q_reg_old=q_reg_old,
+     )
+     if info.backtracking_failed:
+         raise FitError("hard-label M-step backtracking failed")
+-    return updated, info
++    return updated, info, loglik
+ 
+ 
+ def parameter_change(old: Parameters, new: Parameters) -> float:

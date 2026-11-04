@@ -1,0 +1,18 @@
+--- binary_formal_v4_20260919/vendor/bniseam_test/multiview_validation.py	2026-09-19 00:20:30.332348500 +0800
++++ binary_formal_v4_perf_20260919/vendor/bniseam_test/multiview_validation.py	2026-09-19 18:38:08.921421900 +0800
+@@ -426,8 +426,14 @@
+             start = np.zeros(p + 1, dtype=float)
+             start[0] = math.log(probability / (1.0 - probability))
+ 
++            # E4 (perf): hoist the boolean-mask copy out of the closure.  It used to be
++            # rebuilt on every objective evaluation (~25 per class fit) even though the
++            # rows never change; x_ridge_objective_and_gradient only reads it.  Bound to
++            # the current class only, so it is released before the next iteration.
++            class_features = self._features[mask]
++
+             def objective(theta: np.ndarray) -> tuple[float, np.ndarray]:
+-                return x_ridge_objective_and_gradient(theta, self._features[mask], response, lambda_x)
++                return x_ridge_objective_and_gradient(theta, class_features, response, lambda_x)
+ 
+             optimized = minimize(
+                 objective,

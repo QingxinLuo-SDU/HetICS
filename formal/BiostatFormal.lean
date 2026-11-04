@@ -1,0 +1,16 @@
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.Objects
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.Labels
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.YSide
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.Stability
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.Adjustment
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.WholeCenterPLR
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.WholeCenterPLRInference
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.RandomEffectsGLS
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.RandomEffectsGLSInference
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.LearnedPipelineTransfer
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.InferenceComposition
+import BiostatFormal.HighDimensional.ContinuousPipeline.CAVESC.Composition
+
+/-!
+Root module for the active CAVES-C formalization package.
+-/

@@ -1,0 +1,16 @@
+name = "hetics-formal"
+version = "0.1.0"
+defaultTargets = ["HetICS"]
+
+[leanOptions]
+autoImplicit = false
+pp.unicode.fun = true
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "81a5d257c8e410db227a6665ed08f64fea08e997"
+
+[[lean_lib]]
+name = "HetICS"
+roots = ["AIPWJacobian", "B1Current", "BinaryCore", "BinarySubmission", "BiostatFormal", "CenterClusterInference", "CenterClusterInferenceConsumer", "ErrorTarget", "FiniteFreeze", "FiniteFreezeConsumer", "FixedCenterM", "FixedCenterMConsumer", "HetICS", "HierarchicalEffects", "HierarchicalEffectsConsumer", "HierarchicalPopulation", "HierarchicalPopulationConsumer", "JointSandwich", "LearnedRuleApplication", "LearnedRuleApplicationConsumer", "PersonWeightedJoint", "RegisteredCoreBridge", "ScreeningAdjustment"]

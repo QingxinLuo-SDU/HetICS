@@ -1,0 +1,108 @@
+{
+  "layer": "B2",
+  "anchor": {
+    "combo_id": "B2_ANCHOR",
+    "params": {
+      "n_centers": 12,
+      "n_per_center": 2000,
+      "p_total": 500,
+      "K": 3,
+      "delta_spec": 0.5,
+      "rho_max": 3.0,
+      "rho_min": 1.0,
+      "beta_mag_lo": 2.0,
+      "beta_mag_hi": 3.0,
+      "SIG_X_SPEC": 0.6,
+      "n_per_center_var": 0.1,
+      "n_Z": 20,
+      "n_causal_shared": 25,
+      "n_causal_specific": 5,
+      "n_spurious": 50,
+      "gamma_XY": 1.0,
+      "kappa": 0.0,
+      "f_X": "linear",
+      "f_Y": "tanh",
+      "rho_block": 0.6,
+      "rho_cross": 0.3
+    },
+    "param_reps": 10,
+    "data_reps": 10
+  },
+  "stress_combos": [
+    {
+      "combo_id": "B2_BETA_BAND_03_05",
+      "scan_param": "beta_band",
+      "scan_value": "0.3-0.5",
+      "param_overrides": {
+        "beta_mag_lo": 0.3,
+        "beta_mag_hi": 0.5
+      },
+      "param_reps": 5,
+      "data_reps": 10
+    },
+    {
+      "combo_id": "B2_P_TOTAL1000",
+      "scan_param": "p_total",
+      "scan_value": "1000",
+      "param_overrides": {
+        "p_total": 1000
+      },
+      "param_reps": 5,
+      "data_reps": 10
+    },
+    {
+      "combo_id": "B2_N_PER_CENTER1000",
+      "scan_param": "n_per_center",
+      "scan_value": "1000",
+      "param_overrides": {
+        "n_per_center": 1000
+      },
+      "param_reps": 5,
+      "data_reps": 10
+    },
+    {
+      "combo_id": "B2_N_CENTERS9",
+      "scan_param": "n_centers",
+      "scan_value": "9",
+      "param_overrides": {
+        "n_centers": 9
+      },
+      "param_reps": 5,
+      "data_reps": 10
+    },
+    {
+      "combo_id": "B2_RHO_MAX1",
+      "scan_param": "rho_max",
+      "scan_value": "1.0",
+      "param_overrides": {
+        "rho_max": 1.0
+      },
+      "param_reps": 5,
+      "data_reps": 10
+    },
+    {
+      "combo_id": "B2_DELTA_SPEC0",
+      "scan_param": "delta_spec",
+      "scan_value": "0.0",
+      "param_overrides": {
+        "delta_spec": 0.0
+      },
+      "param_reps": 5,
+      "data_reps": 10
+    },
+    {
+      "combo_id": "B2_SIG_X_SPEC0",
+      "scan_param": "SIG_X_SPEC",
+      "scan_value": "0.0",
+      "param_overrides": {
+        "SIG_X_SPEC": 0.0
+      },
+      "param_reps": 5,
+      "data_reps": 10
+    }
+  ],
+  "sig_x_spec_override": {
+    "value": 0,
+    "application": "runtime_adapter_controlled_context"
+  }
+}

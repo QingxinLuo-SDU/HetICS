@@ -1,0 +1,69 @@
+--- a/vendor/bniseam_test/multiview_pipeline.py
++++ b/vendor/bniseam_test/multiview_pipeline.py
+@@ -32,7 +32,8 @@
+     permutation_aligned_agreement,
+     standardize_multiview_scores,
+ )
+-from .multiview_split import HonestSplit, build_honest_split
++from .multiview_split import (HonestSplit, build_full_sample_split,
++                              build_honest_split)
+ from .multiview_types import ObservedDataView, _require_observed, take_observed
+ from .multiview_validation import (
+     XModelCache,
+@@ -139,6 +140,17 @@
+     return _deep_freeze(dict(values))
+ 
+ 
++# Packaged addition: dispatch on an explicit index mode.
++_SPLIT_BUILDERS = {
++    "historical_half": build_honest_split,
++    "full_sample": build_full_sample_split,
++}
++
++
++def _build_split(data: ObservedDataView, config: "PipelineConfig") -> HonestSplit:
++    return _SPLIT_BUILDERS[config.split_mode](data, seed=config.split_seed)
++
++
+ @dataclass(frozen=True)
+ class PipelineConfig:
+     """Frozen controls for the complete truth-free label pipeline."""
+@@ -155,6 +167,10 @@
+     f_scale_floor: float = 1.0e-8
+     x_max_iter: int = 200
+     epsilon_prob: float = 0.01
++    # Packaged addition: index mode.
++    # "historical_half" keeps the 50/25/25 split of the source package; with "full_sample" the label,
++    # screening and effect stages each cover all rows and A/B still partition the label pool.
++    split_mode: str = "historical_half"
+ 
+     def __post_init__(self) -> None:
+         if not isinstance(self.fit_config, FitConfig):
+@@ -181,6 +197,9 @@
+             raise ValueError("f_scale_floor must be positive and finite")
+         if not np.isfinite(self.epsilon_prob) or not 0.0 < self.epsilon_prob <= 0.5:
+             raise ValueError("epsilon_prob must lie in (0, 1/2]")
++        if self.split_mode not in _SPLIT_BUILDERS:
++            raise ValueError(
++                f"split_mode must be one of {sorted(_SPLIT_BUILDERS)}")
+ 
+     def child_seed(
+         self,
+@@ -1309,7 +1328,7 @@
+     if not isinstance(config, PipelineConfig):
+         raise TypeError("config must be a PipelineConfig")
+     dense_center_codes(data)
+-    split = build_honest_split(data, seed=config.split_seed)
++    split = _build_split(data, config)
+     manifest = _split_manifest(data, split, config.split_seed)
+     expected_centers = tuple(_python_scalar(value) for value in data.centers)
+     for rows in (split.a, split.b):
+@@ -1488,7 +1507,7 @@
+         int(data.centers.size),
+         config.cem_config.k_components,
+     )
+-    split = build_honest_split(data, seed=config.split_seed)
++    split = _build_split(data, config)
+     label_fold = _take_preserving_centers(data, split.label)
+     transform = FeatureTransform.fit(label_fold.features)
+     result = refit_bniseam_fixed_labels(

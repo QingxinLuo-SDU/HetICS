@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this simulation code, please cite this repository. Manuscript publication details will be added when available."
+type: software
+title: "HetICS: Heterogeneity-Guided Cross-Center Invariant Covariate Selection for Causal Effect Estimation in Multi-Center Studies"
+authors:
+  - family-names: Luo
+    given-names: Qingxin
+    affiliation: Shandong University
+repository-code: "https://github.com/QingxinLuo-SDU/HetICS"
+license: MIT
+keywords:
+  - causal inference
+  - multicenter studies
+  - variable selection
+  - heterogeneity
+  - simulation

@@ -1,0 +1,4 @@
+# Preserve file bytes used by the archived reproducibility checks.
+* -text
+*.sh text eol=lf
+*.csv.gz binary
